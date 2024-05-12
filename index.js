@@ -36,6 +36,31 @@ async function run() {
         const result = await lopall.toArray()
          res.send(result)
     })
+    app.get('/update/:id', async (req, res) =>{
+       const result = await bookWorld.findOne({_id: new ObjectId(req.params.id)})
+       res.send(result)
+    })
+    app.put('/updates/:id', async (req, res)=>{
+      
+        const id = req.params.id;
+      const filter = {_id : new ObjectId(id)}
+      const options = {upsert: true}
+      const updated = req.body;
+        const data ={
+          $set:{
+            photourl:updated.photourl,
+             author:updated.author,
+             category:updated.category, 
+              name:updated.name, 
+              cost:updated.cost,
+               
+          }
+        }
+        const result= await bookWorld.updateOne(filter, data,  options)
+        res.send(result)
+        // console.log(result)
+       
+      })
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     // Send a ping to confirm a successful connection
