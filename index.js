@@ -26,6 +26,8 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
       const bookWorld = client.db('book').collection('books')
+      const categoryBook = client.db('book').collection('booksCategory')
+      const borrow = client.db('book').collection('borrows')
     app.post('/addbook', async(req, res)=>{
         const addbook = req.body;
           const result =  await bookWorld.insertOne(addbook)
@@ -36,6 +38,20 @@ async function run() {
         const result = await lopall.toArray()
          res.send(result)
     })
+    app.get('/category', async(req, res)=>{
+      const quary = categoryBook.find()
+      const result = await quary.toArray()
+      res.send(result)
+    })
+   app.get('/category/:category', async (req, res)=>{
+    const categoryName = req.params.category
+    const filter ={
+      category: categoryName
+    }
+    const quary = bookWorld.find(filter)
+    const result = await quary.toArray()
+    res.send(result)
+   })
     app.get('/update/:id', async (req, res) =>{
        const result = await bookWorld.findOne({_id: new ObjectId(req.params.id)})
        res.send(result)
@@ -60,6 +76,20 @@ async function run() {
         res.send(result)
         // console.log(result)
        
+      })
+      app.get('/allbook/:id', async (req, res) =>{
+        const id = req.params.id;
+        console.log(id)
+        const quary = {_id: new ObjectId(id)}
+        const resutl = await bookWorld.findOne(quary)
+        res.send(resutl)
+        // console.log(resutl)
+
+      })
+      app.post('/borrow', async(req, res)=>{
+        const quary = req.body;
+        const result= await  borrow.insertOne(quary)
+        res.send(result)
       })
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
