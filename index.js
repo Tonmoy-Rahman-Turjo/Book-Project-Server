@@ -8,7 +8,7 @@ const port = process.env.PORT ||5000;
 // app.use(cors())
 app.use(cors({
   origin:[
-    'http://localhost:5175', 'https://assingemt-elevent-server-site.vercel.app'
+    'http://localhost:5175', 'http://localhost:5173',  'https://assingemt-elevent-server-site.vercel.app'
   ],
   credentials: true
 }))
@@ -47,11 +47,11 @@ const veryfiToken = (req, res, next)=>{
     if(err){
       return res.status(401).send({message: 'unuthorize access'})
     }
-    res.user = decoded;
+    req.user = decoded;
     next()
   })
 
-  next();
+  // next();
 }
   try {
 
@@ -59,50 +59,50 @@ const veryfiToken = (req, res, next)=>{
       const categoryBook = client.db('book').collection('booksCategory')
       const borrow = client.db('book').collection('borrows')
 
-        // app.post("/jwt" , async(req, res)=>{
-        //   const user= req.body
-        //   // console.log('user for token', user)
-        //   const token = jwt.sign(user,process.env.ECCESS_TOKEN_SEC, {expiresIn:'1h'})
-        //   res.cookie('token', token,{  httpOnly: true,
-        //     secure: process.env.NODE_ENV === "production",
-        //     sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",}).send({success:true})
-        //     // res.send({token})
+        app.post("/jwt" , async(req, res)=>{
+          const user= req.body
+          console.log('user for token', user)
+          const token = jwt.sign(user,process.env.ECCESS_TOKEN_SEC, {expiresIn:'1h'})
+          res.cookie('token', token,{  httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",}).send({success:true})
+            // res.send({token})
 
-        // })
-        // app.post('/addbook', loger,veryfiToken, async(req, res)=>{
-        //   console.log('mama cookis', req.user)
-        //     const addbook = req.body;
-        //       const result =  await bookWorld.insertOne(addbook)
-        //       res.send(result)
-        // })
-        // app.get('/allbook', loger, veryfiToken, async(req, res)=>{
-        //   console.log('mama cookis', req.user)
+        })
+        app.post('/addbook', loger,veryfiToken, async(req, res)=>{
+          // console.log('mama cookis', req.user)
+            const addbook = req.body;
+              const result =  await bookWorld.insertOne(addbook)
+              res.send(result)
+        })
+        app.get('/allbook', loger, veryfiToken, async(req, res)=>{
+          console.log('mama cookis', req.user)
     
           
-        //     const lopall = bookWorld.find()
-        //     const result = await lopall.toArray()
-        //      res.send(result)
-        // })
-        // app.post('/logout', async (req, res)=>{
-        //   const user = req.body;
-        //   // console.log('login out user', user)
-        //   res.clearCookie('token', {maxAge: 0} ).send({success: true})
-        // })
+            const lopall = bookWorld.find()
+            const result = await lopall.toArray()
+             res.send(result)
+        })
+        app.post('/logout', async (req, res)=>{
+          const user = req.body;
+          console.log('login out user', user)
+          res.clearCookie('token', {maxAge: 0} ).send({success: true})
+        })
 
-    app.post('/addbook',  async(req, res)=>{
-      // console.log('mama cookis', req.user)
-        const addbook = req.body;
-          const result =  await bookWorld.insertOne(addbook)
-          res.send(result)
-    })
-    app.get('/allbook',async(req, res)=>{
+    // app.post('/addbook',  async(req, res)=>{
+    //   // console.log('mama cookis', req.user)
+    //     const addbook = req.body;
+    //       const result =  await bookWorld.insertOne(addbook)
+    //       res.send(result)
+    // })
+    // app.get('/allbook',async(req, res)=>{
      
 
       
-        const lopall = bookWorld.find()
-        const result = await lopall.toArray()
-         res.send(result)
-    })
+    //     const lopall = bookWorld.find()
+    //     const result = await lopall.toArray()
+    //      res.send(result)
+    // })
     app.get('/category', async(req, res)=>{
       const quary = categoryBook.find()
       const result = await quary.toArray()
