@@ -1,12 +1,20 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config()
+const cookiperseer = require('cookie-parser')
 const app = express()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT ||5000;
-app.use(cors())
+// app.use(cors())
+app.use(cors({
+  origin:[
+    'http://localhost:5175', 'https://assingemt-elevent-server-site.vercel.app'
+  ],
+  credentials: true
+}))
 app.use(express.json())
-
+app.use(cookiperseer())
+const jwt =require('jsonwebtoken')
 
 // console.log(process.env.DB_USER)
 // console.log(process.env.DB_USER)
@@ -24,16 +32,73 @@ const client = new MongoClient(uri, {
 });
 
 async function run() {
+  
+const loger= (req, res, next)=>{
+  console.log('log: info',req.method, req.url)
+  next();
+}
+const veryfiToken = (req, res, next)=>{
+  const token = req?.cookies?.token;
+  console.log('token in the midelwer', token)
+  if(!token){
+    return res.status(401).send({message: 'unuthorize access'})
+  }
+  jwt.verify(token, process.env.ECCESS_TOKEN_SEC, (err, decoded) =>{
+    if(err){
+      return res.status(401).send({message: 'unuthorize access'})
+    }
+    res.user = decoded;
+    next()
+  })
+
+  next();
+}
   try {
+
       const bookWorld = client.db('book').collection('books')
       const categoryBook = client.db('book').collection('booksCategory')
       const borrow = client.db('book').collection('borrows')
-    app.post('/addbook', async(req, res)=>{
+
+        // app.post("/jwt" , async(req, res)=>{
+        //   const user= req.body
+        //   // console.log('user for token', user)
+        //   const token = jwt.sign(user,process.env.ECCESS_TOKEN_SEC, {expiresIn:'1h'})
+        //   res.cookie('token', token,{  httpOnly: true,
+        //     secure: process.env.NODE_ENV === "production",
+        //     sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",}).send({success:true})
+        //     // res.send({token})
+
+        // })
+        // app.post('/addbook', loger,veryfiToken, async(req, res)=>{
+        //   console.log('mama cookis', req.user)
+        //     const addbook = req.body;
+        //       const result =  await bookWorld.insertOne(addbook)
+        //       res.send(result)
+        // })
+        // app.get('/allbook', loger, veryfiToken, async(req, res)=>{
+        //   console.log('mama cookis', req.user)
+    
+          
+        //     const lopall = bookWorld.find()
+        //     const result = await lopall.toArray()
+        //      res.send(result)
+        // })
+        // app.post('/logout', async (req, res)=>{
+        //   const user = req.body;
+        //   // console.log('login out user', user)
+        //   res.clearCookie('token', {maxAge: 0} ).send({success: true})
+        // })
+
+    app.post('/addbook',  async(req, res)=>{
+      // console.log('mama cookis', req.user)
         const addbook = req.body;
           const result =  await bookWorld.insertOne(addbook)
           res.send(result)
     })
-    app.get('/allbook', async(req, res)=>{
+    app.get('/allbook',async(req, res)=>{
+     
+
+      
         const lopall = bookWorld.find()
         const result = await lopall.toArray()
          res.send(result)
@@ -67,8 +132,8 @@ async function run() {
             photourl:updated.photourl,
              author:updated.author,
              category:updated.category, 
-              name:updated.name, 
-              cost:updated.cost,
+              rating:updated.rating, 
+              name:updated.name,
                
           }
         }
@@ -91,12 +156,14 @@ async function run() {
         const result= await  borrow.insertOne(quary)
         res.send(result)
       })
-      app.get('/borrows', async (req, res)=>{
-        const all = borrow.find()
+      // app.get('/borrows', async (req, res)=>{
+      app.get('/borrows/:email', async (req, res)=>{
+
+        const all = borrow.find({email:req.params.email})
         const result = await all.toArray()
         res.send(result)
       })
-      app.delete('/delet/:id', async(req, res)=>{
+      app.delete('/delete/:id', async(req, res)=>{
         const resutl = await borrow.deleteOne({_id: new ObjectId(req.params.id)})
         res.send(resutl)
       })
